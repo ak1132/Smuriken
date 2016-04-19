@@ -1,0 +1,23 @@
+﻿<Properties StartupItem="Assembly-CSharp.csproj">
+  <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" PreferredExecutionTarget="Unity.Instance.Unity Editor" />
+  <MonoDevelop.Ide.Workbench ActiveDocument="Assets\Plugins\Android\GoogleMobileAdsPlugin\AndroidManifest.xml">
+    <Files>
+      <File FileName="Assets\Scripts\UnityAdManager.cs" Line="91" Column="1" />
+      <File FileName="Assets\Scripts\GameController.cs" Line="545" Column="36" />
+      <File FileName="Assets\Scripts\InputManager.cs" Line="1" Column="1" />
+      <File FileName="Assets\Scripts\UIManager.cs" Line="1" Column="1" />
+      <File FileName="Assets\Scripts\MenuController.cs" Line="1" Column="1" />
+      <File FileName="Assets\Scripts\CollectibleController.cs" Line="1" Column="1" />
+      <File FileName="Assets\Scripts\GoogleAdManager.cs" Line="1" Column="1" />
+      <File FileName="Assets\Scripts\PlayerData.cs" Line="1" Column="1" />
+      <File FileName="Assets\Scripts\ObstacleController.cs" Line="1" Column="1" />
+      <File FileName="Assets\Scripts\Mover.cs" Line="1" Column="1" />
+      <File FileName="Assets\Scripts\CameraAspectRatio.cs" Line="1" Column="1" />
+      <File FileName="Assets\Plugins\Android\GoogleMobileAdsPlugin\AndroidManifest.xml" Line="12" Column="35" />
+    </Files>
+  </MonoDevelop.Ide.Workbench>
+  <MonoDevelop.Ide.DebuggingService.Breakpoints>
+    <BreakpointStore />
+  </MonoDevelop.Ide.DebuggingService.Breakpoints>
+  <MonoDevelop.Ide.DebuggingService.PinnedWatches />
+</Properties>
