@@ -1,0 +1,29 @@
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Visual Studio 2008
+
+Project("{DCE4249B-1E5E-E43F-8539-3AA3DB1382D1}") = "Smurk-working", "Assembly-CSharp.csproj", "{44605672-620C-5B01-44F8-CF7E3FB8B246}"
+EndProject
+Project("{DCE4249B-1E5E-E43F-8539-3AA3DB1382D1}") = "Smurk-working", "Assembly-CSharp-Editor.csproj", "{52371179-DC07-EB03-F568-A4DE41503DA9}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{44605672-620C-5B01-44F8-CF7E3FB8B246}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{44605672-620C-5B01-44F8-CF7E3FB8B246}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{44605672-620C-5B01-44F8-CF7E3FB8B246}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{44605672-620C-5B01-44F8-CF7E3FB8B246}.Release|Any CPU.Build.0 = Release|Any CPU
+		{52371179-DC07-EB03-F568-A4DE41503DA9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{52371179-DC07-EB03-F568-A4DE41503DA9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{52371179-DC07-EB03-F568-A4DE41503DA9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{52371179-DC07-EB03-F568-A4DE41503DA9}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(MonoDevelopProperties) = preSolution
+		StartupItem = Assembly-CSharp.csproj
+	EndGlobalSection
+EndGlobal

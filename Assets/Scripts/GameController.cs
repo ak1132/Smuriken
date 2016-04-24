@@ -2,8 +2,11 @@
 using System.Collections;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
+using GooglePlayGames;
+using UnityEngine.SocialPlatforms;
 
-public class GameController : MonoBehaviour {
+public class GameController : MonoBehaviour
+{
 
 	public static int timesPlayed = 1;
 
@@ -34,15 +37,12 @@ public class GameController : MonoBehaviour {
 	public AudioSource bgAudioSource;
 	public Text highScoreText;
 	public Text currentScoreText;
-//	public bool[] cPath;
-//	public bool[] oPath;
-
 
 	private int activeCollectibles;
 	private int activeObstacles;
 	private int level;
 	[SerializeField] private int highScore;
-	[SerializeField]private bool adWatched;
+	[SerializeField] private bool adWatched;
 	private bool keepPlaying;
 	private bool isCollectibleSelection;
 	private bool isObstacleSelection;
@@ -52,9 +52,10 @@ public class GameController : MonoBehaviour {
 	private bool isMusicEnabled = true;
 	private UIManager uiManager;
 	private GoogleAdManager googleAd;
+	private GooglePlayGamesConfig gamesConfig;
 	private int prevRandomPattern;
 
-	void OnEnable()
+	void OnEnable ()
 	{
 		playerData = new PlayerData ();
 		if (playerData.Load ()) {
@@ -72,7 +73,8 @@ public class GameController : MonoBehaviour {
 	}
 
 	// Use this for initialization
-	void Start () {
+	void Start ()
+	{
 		activeObstacles = 0;
 		prevRandomPattern = -1;
 		activeCollectibles = 0;
@@ -92,145 +94,90 @@ public class GameController : MonoBehaviour {
 		audioSource = GetComponent<AudioSource> ();
 		uiManager = GetComponent<UIManager> ();
 		googleAd = GetComponent<GoogleAdManager> ();
-
-//		if (PlayerPrefs.HasKey ("Sound")) {
-//			isMusicEnabled = PlayerPrefs.GetInt ("Sound") == 1 ? true : false;
-//			if (!isMusicEnabled)
-//				DisableSound ();
-//		} else 
-//		{
-//			PlayerPrefs.SetInt ("Sound", 1);
-//			isMusicEnabled = true;
-//		}
-
-//		playerData = new PlayerData ();
-//		if (playerData.Load ()) {
-//			highScore = playerData.data.HighScore;
-//			adWatched = playerData.data.AdWatched;
-//		} else {
-//			playerData.data.HighScore = 0;
-//			playerData.data.AdWatched = false;
-//			playerData.Save ();
-//			highScore = 0;
-//			adWatched = false;
-//		}
-//		//Change adWatched back to false after rewarding the player in the game
-//		playerData.data.AdWatched = false;
-
-//		Debug.Log ("Collectibles Length:" + collectibles.Length);
-//		for (int i = 0; i < 3; i++) {
-//			cPath [i] = true;
-//			oPath [i] = true;
-//		}
+		gamesConfig = GetComponent<GooglePlayGamesConfig> ();
+		gamesConfig.SignIn ();
 		StartCoroutine (Play ());
 	}
 	
 	// Update is called once per frame
-	void Update () {
+	void Update ()
+	{
 
-		if (Input.GetKeyDown(KeyCode.Escape)) 
-		{
+		if (Input.GetKeyDown (KeyCode.Escape)) {
 			Application.Quit ();
 		}
 	}
 
-	IEnumerator Play()
+	IEnumerator Play ()
 	{
-		//Select a random spawn Point
-		//Select a random collectible and put it on the spawn point selected
-		//same for obstacles
-		//repeat until the no of obstacles and collectibles reach the limit
-		//repeat everything until the player progresses to next level
-		while (keepPlaying )
-		{
-//			Debug.Log ("Level:"+level);
-//			Invoke ("DisplayLevel", 1.0f);
-			uiManager.StartLevelUpAnimation(level);
+		while (keepPlaying) {
+			uiManager.StartLevelUpAnimation (level);
 			if (level == 1) {
 				yield return new WaitForSeconds (timeBetweenLevels - 2.0f);
 			} else {
 				yield return new WaitForSeconds (timeBetweenLevels);
 			}
-			while (playerScore < level * transitionScore)
-			{
-				//Debug.Log ("Player Score:" + playerScore + " level:" + level);
-//				Invoke("SelectRandomPositionandCollectible",
-//					Random.Range(minCollectibleTime,maxCollectibleTime));
-//				Debug.Log("isCollectibleSelection"+isCollectibleSelection +" isObstacleSelection"+isObstacleSelection);
-				if (!isCollectibleSelection) 
-				{
+			while (playerScore < level * transitionScore) {
+				if (!isCollectibleSelection) {
 					isCollectibleSelection = true;
 					StartCoroutine (SelectRandomPositionandCollectible ());
 				}
-				if (!isObstacleSelection) 
-				{
+				if (!isObstacleSelection) {
 					isObstacleSelection = true;
 //					StartCoroutine (SelectRandomPositionandObstacle ());
-					StartCoroutine(SelectRandomPositionAndObstacles());
+					StartCoroutine (SelectRandomPositionAndObstacles ());
 				}
-				yield return new WaitForSeconds(0.1f);
+				yield return new WaitForSeconds (0.1f);
 			}
-
+			gamesConfig.UnlockAchievement ("Level" + level);
 			level += 1;
-//			PlayLevelUpSound ();
 			SetLevelSpeedAndTime ();
-			StartCoroutine (ChangeColor(3.0f));
+			StartCoroutine (ChangeColor (3.0f));
 		}
 	}
 
-	public void GameOverHandler()
+	public void GameOverHandler ()
 	{
 		timesPlayed += 1;
 		keepPlaying = false;
-		highScoreText.text = "BEST SCORE: " + highScore.ToString();
+		highScoreText.text = "BEST SCORE: " + highScore.ToString ();
 		currentScoreText.text = playerScore.ToString ();
 //		Debug.Log ("TimesPlayed "+ timesPlayed);
 		if (playerScore > highScore) {
 			playerData.data.HighScore = playerScore;
 			highScoreText.text = "NEW RECORD!";
+			gamesConfig.PostToLeaderBoard (highScore);
 		}
 		playerData.Save ();
-//		yield return new WaitForSeconds (2.0f);
 		Time.timeScale = 0.5f;
-		uiManager.GameOverAnimation();
+		uiManager.GameOverAnimation ();
 		if (timesPlayed % 4 == 0)
 			googleAd.DisplayInterstitialAd ();
-//		Invoke("ResetLevel",1.0f);
-//		Time.timeScale = 0.5f;
-////		Time.timeScale = 0;
-////		ResetTimeScale(2.0f);
-//		//Remove this line after debugging
-//		googleAd.HideBannerAd ();
-//		if (timesPlayed % 3 == 0) {
-//			if (!unityAd.ShowDefaultAd ())
-//				googleAd.DisplayInterstitialAd ();
-//		}
-//		googleAd.DisplayBannerAd ();
 	}
 
-	public void OnAdCompletion()
+	public void OnAdCompletion ()
 	{
 		playerData.data.AdWatched = true;
 		playerData.Save ();
 	}
 
-	public void ResetLevel()
+	public void ResetLevel ()
 	{
 		Time.timeScale = 1;
 		SceneManager.LoadSceneAsync (SceneManager.GetActiveScene ().name);
 	}
 
-	public void DecreaseActiveCollectible()
+	public void DecreaseActiveCollectible ()
 	{
 		activeCollectibles -= 1;
 	}
 
-	public void DecreaseActiveObstacle()
+	public void DecreaseActiveObstacle ()
 	{
 		activeObstacles -= 1;
 	}
 
-	IEnumerator SelectRandomPositionandObstacle()
+	IEnumerator SelectRandomPositionandObstacle ()
 	{
 		int maxNum = 1;
 		if (level == 1)
@@ -240,18 +187,14 @@ public class GameController : MonoBehaviour {
 		else if (level >= 4)
 			maxNum = 2;
 		int prevRandPath = -1;
-		while (activeObstacles < maxActiveObstacles && maxNum > 0)
-		{
+		while (activeObstacles < maxActiveObstacles && maxNum > 0) {
 			int randPath = Random.Range (0, 3);
-			if (randPath != prevRandPath) 
-			{
+			if (randPath != prevRandPath) {
 				prevRandPath = randPath;
-				for (int i = 0; i < obstacles.Length; i++) 
-				{
-					if (obstacles [i].activeSelf == false) 
-					{
+				for (int i = 0; i < obstacles.Length; i++) {
+					if (obstacles [i].activeSelf == false) {
 						obstacles [i].SetActive (true);
-						obstacles [i].GetComponent<ObstacleController> ().Reset(
+						obstacles [i].GetComponent<ObstacleController> ().Reset (
 							obstacleSpawnPoints [Random.Range (2 * randPath, 2 * randPath + 2)],
 							obstacleSpeed);
 						break;
@@ -261,18 +204,16 @@ public class GameController : MonoBehaviour {
 				activeObstacles += 1;
 			}
 		}
-		yield return new WaitForSeconds (Random.Range(minObstacleTime,maxObstacleTime));
+		yield return new WaitForSeconds (Random.Range (minObstacleTime, maxObstacleTime));
 		isObstacleSelection = false;
 	}
 
-	IEnumerator SelectRandomPositionAndObstacles()
+	IEnumerator SelectRandomPositionAndObstacles ()
 	{
-		if (activeObstacles < maxActiveObstacles)
-		{
+		if (activeObstacles < maxActiveObstacles) {
 			int lev = level % maxLevels;
 			int pattern = 0;
-			switch (lev) 
-			{
+			switch (lev) {
 			case 1:
 				pattern = Random.Range (0, 3);
 				SetObstacleValues (Random.Range (2 * pattern, 2 * pattern + 2), obstacleSpeed * 2f);
@@ -288,8 +229,7 @@ public class GameController : MonoBehaviour {
 				break;
 			case 3:
 				pattern = Random.Range (0, 4);
-				switch (pattern)
-				{
+				switch (pattern) {
 				case 0:
 					SetObstacleValues (0, obstacleSpeed * 1.75f);
 					SetObstacleValues (3, obstacleSpeed * 1.75f);
@@ -448,7 +388,7 @@ public class GameController : MonoBehaviour {
 					SetObstacleValues (5, obstacleSpeed * 2f);
 					break;
 				}
-				yield return new WaitForSeconds (deltaTime*4);
+				yield return new WaitForSeconds (deltaTime * 4);
 				break;
 			case 9:
 				break;
@@ -504,19 +444,18 @@ public class GameController : MonoBehaviour {
 					SetObstacleValues (1, obstacleSpeed * 2.2f);
 					break;
 				}
-				yield return new WaitForSeconds (deltaTime*5);
+				yield return new WaitForSeconds (deltaTime * 5);
 				break;
 
 			}
 		}
-		yield return new WaitForSeconds (Random.Range(minObstacleTime,maxObstacleTime));
+		yield return new WaitForSeconds (Random.Range (minObstacleTime, maxObstacleTime));
 		isObstacleSelection = false;
 	}
 
-	void SetObstacleValues(int position, float speed)
+	void SetObstacleValues (int position, float speed)
 	{
-		if (activeObstacles < maxActiveObstacles)
-		{
+		if (activeObstacles < maxActiveObstacles) {
 			for (int i = 0; i < obstacles.Length; i++) {
 				if (obstacles [i].activeSelf == false) {
 					obstacles [i].SetActive (true);
@@ -530,14 +469,14 @@ public class GameController : MonoBehaviour {
 		}
 	}
 
-	public void IncrementPlayerScore(int value)
+	public void IncrementPlayerScore (int value)
 	{
 		playerScore += value;
 		uiManager.UpdateScore (playerScore);
 		//Do more stuff
 	}
 
-	public void SetLevelSpeedAndTime()
+	public void SetLevelSpeedAndTime ()
 	{
 		int lev = level % maxLevels;
 		if (lev == 2) {
@@ -574,15 +513,14 @@ public class GameController : MonoBehaviour {
 		}
 	}
 
-	IEnumerator SelectRandomPositionandCollectible()
+	IEnumerator SelectRandomPositionandCollectible ()
 	{
 		//isCollectibleSelection = true;
 		int maxNum = 1;
 		if (adWatched)
 			maxNum = 2;
 		int prevRandPath = -1;
-		if (activeCollectibles == 0)
-		{
+		if (activeCollectibles == 0) {
 			while (activeCollectibles < maxActiveCollectibles && maxNum > 0) {
 				int randPath = Random.Range (0, 3);
 				int randCollectible = Random.Range (0, collectibles.Length);
@@ -605,24 +543,23 @@ public class GameController : MonoBehaviour {
 		isCollectibleSelection = false;
 	}
 
-	IEnumerator ChangeColor(float maxTime)
+	IEnumerator ChangeColor (float maxTime)
 	{
-		yield return new WaitForSeconds(1.0f);
+		yield return new WaitForSeconds (1.0f);
 		int tempColor = (level - 1) % colours.Length;
 		float prevTime = Time.time + maxTime;
-		while (Time.time <= prevTime && bgRenderer.material.color != colours [tempColor])
-		{
+		while (Time.time <= prevTime && bgRenderer.material.color != colours [tempColor]) {
 			bgRenderer.material.color = Color.Lerp (
 				bgRenderer.material.color,
 				colours [tempColor],
 				.1f);
-			yield return new WaitForSeconds(0.1f);
+			yield return new WaitForSeconds (0.1f);
 		}
 //		Debug.Log ("Returning");
 	}
 	//Device id 6PKVLNU4PJYDCIY5
 
-	public void PlayCollectibleSound()
+	public void PlayCollectibleSound ()
 	{
 		if (isMusicEnabled) {
 			if (playerScore % transitionScore != 0) {
@@ -633,56 +570,54 @@ public class GameController : MonoBehaviour {
 		}
 	}
 
-	public void PlayGameOverSound()
+	public void PlayGameOverSound ()
 	{
-		if (isMusicEnabled) 
-		{
+		if (isMusicEnabled) {
 			bgAudioSource.Pause ();
 			audioSource.clip = clipGameOver;
 			audioSource.Play ();
 		}
 	}
 
-	public void PlayRestartSound()
+	public void PlayRestartSound ()
 	{
-		if (isMusicEnabled) 
-		{
+		if (isMusicEnabled) {
 			audioSource.clip = clipGameRestart;
 			audioSource.Play ();
 		}
 	}
 
-	public void PlayLevelUpSound()
+	public void PlayLevelUpSound ()
 	{
-		if (isMusicEnabled) 
-		{
+		if (isMusicEnabled) {
 			audioSource.clip = clipLevelUp;
 			audioSource.Play ();
 		}
 	}
 
-	public void PauseMusic()
+	public void PauseMusic ()
 	{
 		bgAudioSource.Pause ();
 		audioSource.Pause ();
 	}
 
-	public void ResumeMusic()
+	public void ResumeMusic ()
 	{
 		bgAudioSource.UnPause ();
 		audioSource.UnPause ();
 	}
 
-	public void DisableSound()
+	public void DisableSound ()
 	{
 		bgAudioSource.Stop ();
 		audioSource.Stop ();
 		isMusicEnabled = false;
 	}
 
-	public void EnableSound()
+	public void EnableSound ()
 	{
 		isMusicEnabled = true;
 		bgAudioSource.Play ();
 	}
+		
 }
