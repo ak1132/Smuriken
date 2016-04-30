@@ -4,55 +4,58 @@ using GooglePlayGames;
 using GooglePlayGames.BasicApi;
 using UnityEngine.SocialPlatforms;
 
-public class GooglePlayGamesConfig : MonoBehaviour
+public class GooglePlayGamesConfig
 {
 
-	private string Leaderboard = "CgkI34W329IKEAIQDA";
+	private static GooglePlayGamesConfig _instance = null;
 
-	private string Level1 = "CgkI34W329IKEAIQAQ";
-	private string Level2 = "CgkI34W329IKEAIQAg";
-	private string Level3 = "CgkI34W329IKEAIQAw";
-	private string Level4 = "CgkI34W329IKEAIQBA";
-	private string Level5 = "CgkI34W329IKEAIQBQ";
-	private string Level6 = "CgkI34W329IKEAIQBg";
-	private string Level7 = "CgkI34W329IKEAIQBw";
-	private string Level8 = "CgkI34W329IKEAIQCA";
-	private string Level9 = "CgkI34W329IKEAIQCQ";
-	private string Level10 = "CgkI34W329IKEAIQCg";
-	private string SmurikenMaster = "CgkI34W329IKEAIQCw";
-
-
-	// Use this for initialization
-	void Start ()
+	private GooglePlayGamesConfig ()
 	{
-		PlayGamesClientConfiguration config = new PlayGamesClientConfiguration.Builder ()
-		                                      // enables saving game progress.
-			.EnableSavedGames ()
-		                                      // require access to a player's Google+ social graph to sign in
-			.RequireGooglePlus ()
-			.Build ();
-
-		PlayGamesPlatform.InitializeInstance (config);
-		// recommended for debugging:
+		// Code to initialize this object would go here
 		PlayGamesPlatform.DebugLogEnabled = true;
 		// Activate the Google Play Games platform
 		PlayGamesPlatform.Activate ();
 	}
 
+	public static GooglePlayGamesConfig Instance {
+		get {
+			if (_instance == null) {
+				_instance = new GooglePlayGamesConfig ();
+			}
+			return _instance;
+		}
+	}
+	// Use this for initialization
+	void Start ()
+	{
+		//PlayGamesClientConfiguration config = new PlayGamesClientConfiguration.Builder ()
+		//.RequireGooglePlus () // require access to a player's Google+ social graph to sign in
+		//.Build ();
+
+		//PlayGamesPlatform.InitializeInstance (config);
+		// recommended for debugging:
+
+	}
+
 	public void SignIn ()
 	{
-		Social.localUser.Authenticate ((bool success) => {
-			if (success == true)
-				Debug.Log ("Successful Login");
-			else
-				Debug.Log ("Login failed");
-		});
+		if (!PlayGamesPlatform.Instance.localUser.authenticated) {
+			PlayGamesPlatform.Instance.Authenticate ((bool success) => {
+				if (success) {
+					Debug.Log ("Silently signed in! Welcome " + PlayGamesPlatform.Instance.localUser.userName);
+				} else {
+					Debug.Log ("Oh... we're not signed in.");
+				}
+			}, true);
+		} else {
+			Debug.Log ("We're already signed in");
+		}
 	}
 
 	public void UnlockAchievement (string achieve)
 	{
 		achieve = GetAchievementStr (achieve);
-		Social.ReportProgress (achieve, 100.0f, (bool success) => {
+		PlayGamesPlatform.Instance.ReportProgress (achieve, 100.0f, (bool success) => {
 			if (success == true)
 				Debug.Log ("Successful Achievement Unlocked");
 			else
@@ -64,33 +67,33 @@ public class GooglePlayGamesConfig : MonoBehaviour
 	{
 		switch (name) {
 		case "Level1":
-			return Level1;
+			return GooglePlayGamesConstants.achievement_level_1;
 		case "Level2":
-			return Level2;
+			return GooglePlayGamesConstants.achievement_level_2;
 		case "Level3":
-			return Level3;
+			return GooglePlayGamesConstants.achievement_level_3;
 		case "Level4":
-			return Level4;
+			return GooglePlayGamesConstants.achievement_level_4;
 		case "Level5":
-			return Level5;
+			return GooglePlayGamesConstants.achievement_level_5;
 		case "Level6":
-			return Level6;
+			return GooglePlayGamesConstants.achievement_level_6;
 		case "Level7":
-			return Level7;
+			return GooglePlayGamesConstants.achievement_level_7;
 		case "Level8":
-			return Level8;
+			return GooglePlayGamesConstants.achievement_level_8;
 		case "Level9":
-			return Level9;
+			return GooglePlayGamesConstants.achievement_level_9;
 		case "Level10":
-			return Level10;
+			return GooglePlayGamesConstants.achievement_level_10;
 		default:
-			return SmurikenMaster;
+			return GooglePlayGamesConstants.achievement_smuriken_master;
 		}
 	}
 
 	public void PostToLeaderBoard (int score)
 	{
-		Social.ReportScore (score, Leaderboard, (bool success) => {
+		PlayGamesPlatform.Instance.ReportScore (score, GooglePlayGamesConstants.leaderboard_top_smuriken_masters, (bool success) => {
 			if (success == true)
 				Debug.Log ("Successful Leaderboard post");
 			else
@@ -98,15 +101,14 @@ public class GooglePlayGamesConfig : MonoBehaviour
 		});
 	}
 
+	public bool IsAuthenticated ()
+	{
+		return PlayGamesPlatform.Instance.localUser.authenticated;
+	}
+
 	public void ShowLeaderBoardUI ()
 	{
-		PlayGamesPlatform.Instance.ShowLeaderboardUI (Leaderboard);
-	}
-	
-	// Update is called once per frame
-	void Update ()
-	{
-		
+		PlayGamesPlatform.Instance.ShowLeaderboardUI (GooglePlayGamesConstants.leaderboard_top_smuriken_masters);
 	}
 
 }

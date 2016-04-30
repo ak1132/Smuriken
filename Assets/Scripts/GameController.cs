@@ -3,6 +3,7 @@ using System.Collections;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 using GooglePlayGames;
+using GooglePlayGames.BasicApi;
 using UnityEngine.SocialPlatforms;
 
 public class GameController : MonoBehaviour
@@ -52,11 +53,11 @@ public class GameController : MonoBehaviour
 	private bool isMusicEnabled = true;
 	private UIManager uiManager;
 	private GoogleAdManager googleAd;
-	private GooglePlayGamesConfig gamesConfig;
 	private int prevRandomPattern;
 
 	void OnEnable ()
 	{
+		
 		playerData = new PlayerData ();
 		if (playerData.Load ()) {
 			highScore = playerData.data.HighScore;
@@ -75,6 +76,8 @@ public class GameController : MonoBehaviour
 	// Use this for initialization
 	void Start ()
 	{
+		if (!GooglePlayGamesConfig.Instance.IsAuthenticated ())
+			GooglePlayGamesConfig.Instance.SignIn ();
 		activeObstacles = 0;
 		prevRandomPattern = -1;
 		activeCollectibles = 0;
@@ -94,15 +97,12 @@ public class GameController : MonoBehaviour
 		audioSource = GetComponent<AudioSource> ();
 		uiManager = GetComponent<UIManager> ();
 		googleAd = GetComponent<GoogleAdManager> ();
-		gamesConfig = GetComponent<GooglePlayGamesConfig> ();
-		gamesConfig.SignIn ();
 		StartCoroutine (Play ());
 	}
 	
 	// Update is called once per frame
 	void Update ()
 	{
-
 		if (Input.GetKeyDown (KeyCode.Escape)) {
 			Application.Quit ();
 		}
@@ -129,7 +129,7 @@ public class GameController : MonoBehaviour
 				}
 				yield return new WaitForSeconds (0.1f);
 			}
-			gamesConfig.UnlockAchievement ("Level" + level);
+			GooglePlayGamesConfig.Instance.UnlockAchievement ("Level" + level);
 			level += 1;
 			SetLevelSpeedAndTime ();
 			StartCoroutine (ChangeColor (3.0f));
@@ -146,7 +146,9 @@ public class GameController : MonoBehaviour
 		if (playerScore > highScore) {
 			playerData.data.HighScore = playerScore;
 			highScoreText.text = "NEW RECORD!";
-			gamesConfig.PostToLeaderBoard (highScore);
+			//gamesConfig.PostToLeaderBoard (highScore);
+			GooglePlayGamesConfig.Instance.PostToLeaderBoard (highScore);
+
 		}
 		playerData.Save ();
 		Time.timeScale = 0.5f;
@@ -618,6 +620,13 @@ public class GameController : MonoBehaviour
 	{
 		isMusicEnabled = true;
 		bgAudioSource.Play ();
+	}
+
+	public void ShowLeaderboard ()
+	{
+		if (!GooglePlayGamesConfig.Instance.IsAuthenticated ())
+			GooglePlayGamesConfig.Instance.SignIn ();
+		GooglePlayGamesConfig.Instance.ShowLeaderBoardUI ();
 	}
 		
 }
